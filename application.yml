@@ -1,0 +1,44 @@
+statsd:
+  app:
+    name: pg-proxy-api-gateway
+    host: localhost
+    port: 8130
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+server:
+  port: 8080
+spring:
+  cloud:
+    stream:
+      kafka:
+        binder:
+          brokers: "10.170.2.124:9092"
+          zkNodes: "10.170.2.124:2181"
+    gateway:
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOrigins: '*'
+            allowedHeaders: "DNT,X-CustomHeader,Keep-Alive,User-Agent,X-Requested-With,If-Modified-Since,sso_token,Cache-Control,Content-Type"
+            allowedMethods:
+              - GET
+              - POST
+              - OPTIONS
+      routes:
+        - id: merchant-adapter
+          uri: http://internal-pgp-stage-renew-888787262.ap-south-1.elb.amazonaws.com/
+          predicates:
+            - Path=/merchant-adapter/HANDLER_INTERNAL/TXNSTATUS/**,
+              /merchant-adapter/closeOrder/**,
+              /merchant-adapter/customProcessTransaction/**,
+              /merchant-adapter/v1/customTransactionStatus/**
+            - Method=GET,POST,OPTIONS
+  application:
+    name: pg-proxy-api-gateway
+queryParam:
+  encodingCheck:
+    for:
+      URI: /merchant-status/getTxnStatus,ALL
